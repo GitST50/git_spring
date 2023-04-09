@@ -42,7 +42,7 @@ public class UserController {
 		//중복체크
 		Map<String, String> map = new HashMap();
 		map.put("mbId", loginDTO.getId());
-		map.put("mbpw", loginDTO.getPw());
+		map.put("mbPw", loginDTO.getPw());
 		
 		
 		//중복체크

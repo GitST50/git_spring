@@ -37,10 +37,11 @@ public class AllExceptionHandler {
 				.result(exception.getCode().getResult())
 				.resultDesc(exception.getCode().getResultDesc())
 				.resDate(CommonUtils.currentTime())
-				.reqNo(CommonUtils.currentTime())
+				.reqNo(exception.getReqNo())
+				.httpStatus(exception.getHttpStatus())
 				.build();
 		
-		return new ResponseEntity<>(errRes, errRes.getHttpStatus());
+		return new ResponseEntity<ErrorResponse>(errRes, errRes.getHttpStatus());
 		
 		
 		
@@ -50,7 +51,7 @@ public class AllExceptionHandler {
 	@ExceptionHandler(InternalServerError.class)
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public HttpEntity<ErrorResponse> handelerInternalServerError(InternalException exception){
-		System.out.println("==========Internal Error========="+exception.getMessage());
+		System.out.println("==========Internal Error========="+ exception.getMessage());
 		ErrorResponse errRes = ErrorResponse.builder()
 				.result(exception.getCode().getResult())
 				.resultDesc(exception.getCode().getResultDesc())

@@ -5,6 +5,9 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class Pagination {
 	
 	public static Map<String, Object> pagination(int totalcount, HttpServletRequest request){
@@ -12,7 +15,7 @@ public class Pagination {
 		//페이지넘버 초기화
 		String pnum = request.getParameter("page");
 		System.out.println("pnum"+pnum);
-		if(pnum==null) {pnum = "1";}
+		if(pnum==null) { pnum = "1"; }
 		
 		//스트링을 인트로 파싱
 		int rowNUM = Integer.parseInt(pnum);
@@ -23,8 +26,7 @@ public class Pagination {
 		if(totalcount % 10 == 0) {
 			pageNum = totalcount /10;
 			
-		}
-		else {
+		}else {
 			pageNum = (totalcount /10)+1;
 		}
 		if (rowNUM > pageNum) { rowNUM = pageNum;}
