@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService{
 	
 	@Override
 	public int mbDuplicationCheck(Map<String, String> map) {
-		//TODO Auto-generated method stub
+		//TODO Auto-generated method stub 
 		return userMapper.mbDuplicationCheck(map);
 	}
 	

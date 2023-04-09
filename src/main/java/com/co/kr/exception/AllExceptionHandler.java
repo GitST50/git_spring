@@ -60,7 +60,7 @@ public class AllExceptionHandler {
 		return new ResponseEntity<ErrorResponse>(errRes,HttpStatus.INTERNAL_SERVER_ERROR);
 		
 		
-		
+		//
 	}
 	
 	
