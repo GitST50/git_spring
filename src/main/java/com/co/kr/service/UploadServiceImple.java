@@ -90,7 +90,7 @@ public class UploadServiceImple implements UploadService {
 						
 						fileList = (List<BoardFileDomain>) session.getAttribute("files");
 						
-						for(BoardFileDomain list: fileList) {
+						for(BoardFileDomain list : fileList) {
 							list.getUpFilePath();
 							Path filePath = Paths.get(list.getUpFilePath());
 							
@@ -98,7 +98,7 @@ public class UploadServiceImple implements UploadService {
 								//파일삭제
 								Files.deleteIfExists(filePath); //not found시 exception발생안하고 false 처리
 								//삭제
-								bdFileRemove(list); //데이터 삭제
+						bdFileRemove(list); //데이터 삭제
 								
 							} catch (DirectoryNotEmptyException e) {
 								throw RequestException.fire(Code.E404,"디렉토리가 존재하지 않습니다", HttpStatus.NOT_FOUND);
@@ -210,12 +210,14 @@ public class UploadServiceImple implements UploadService {
 	@Override
 	public void bdContentRemove(HashMap<String, Object> map) {
 		// TODO Auto-generated method stub
+		uploadMapper.bdContentRemove(map);
 		
 	}
 
 	@Override
 	public void bdFileRemove(BoardFileDomain boardFileDomain) {
 		// TODO Auto-generated method stub
+		uploadMapper.bdFileRemove(boardFileDomain);
 		
 	}
 	//하나만 가져오기
