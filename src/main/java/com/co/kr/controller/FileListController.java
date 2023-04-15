@@ -1,14 +1,20 @@
 package com.co.kr.controller;
 
 import java.io.IOException;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -17,8 +23,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.co.kr.code.Code;
 import com.co.kr.domain.BoardFileDomain;
 import com.co.kr.domain.BoardListDomain;
+import com.co.kr.exception.RequestException;
 import com.co.kr.service.UploadService;
 import com.co.kr.vo.FileListVO;
 
@@ -112,6 +120,76 @@ public class FileListController {
 		
 		
 		
+		
 	}
+	@PostMapping("editSave")
+	public ModelAndView editSave(@ModelAttribute("fileListVO") FileListVO fileListVO,MultipartHttpServletRequest request, HttpServletRequest httpReq) throws IOException{
+		ModelAndView mav = new ModelAndView();
+		//저장
+		uploadService.fileProcess(fileListVO, request, httpReq);
+		
+		mav = bdSelectOneCall(fileListVO, fileListVO.getSeq(), request);
+		fileListVO.setContent("");//초기화
+		fileListVO.setTitle("");//초기화
+		mav.setViewName("board/boardList.html");
+		return mav; //
+	}
+	
+	@GetMapping("remove")
+	  public ModelAndView mbRemove(@RequestParam("bdSeq") String bdSeq, HttpServletRequest request) throws IOException{
+		ModelAndView mav = new ModelAndView();
+		
+		HttpSession session = request.getSession();
+		HashMap<String, Object> map= new HashMap<String, Object>();
+		List<BoardFileDomain> fileList = null;
+		if(session.getAttribute("files") != null) {
+			fileList = (List<BoardFileDomain>) session.getAttribute("files");
+		}
+		
+		map.put("bdSeq", Integer.parseInt(bdSeq));
+		
+		//내용 삭제
+		uploadService.bdContentRemove(map);
+		
+		for(BoardFileDomain list : fileList) {
+			list.getUpFilePath();
+			Path filePath = Paths.get(list.getUpFilePath());
+			
+			  try {
+				  
+				  //파일 물리삭제
+				  Files.deleteIfExists(filePath); //notfound시 exception 발생안하고 false 처리
+				  
+				  //db삭제
+				  uploadService.bdFileRemove(list);
+				
+			} catch (DirectoryNotEmptyException e) {
+				// TODO: handle exception
+				throw RequestException.fire(Code.E404, "디렉토리가 존재하지않습니다.",HttpStatus.NOT_FOUND);
+			}
+			  catch (IOException e) {
+				// TODO: handle exception
+				  e.printStackTrace();
+			}
+		}
+		
+		//세션 해제
+		session.removeAttribute("files"); //삭제
+		mav = bdListCall();
+		mav.setViewName("board/boardList.html");
+		
+		return mav;
+		
+	}
+	
+	//리스트 가져오기 따로 함수뺌
+	public ModelAndView bdListCall() {
+		ModelAndView mav = new ModelAndView();
+		List<BoardListDomain> items = uploadService.boardList();
+		mav.addObject("items", items);
+		return mav;
+	}
+	
+	
 
 }

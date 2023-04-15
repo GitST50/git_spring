@@ -43,5 +43,6 @@
             <button type="submit" style="margin-right: 11px">내용수정</button>
        </div>
     </div>
+    <form role="form" th:object=${fileListVO} th:action="@{editSave}" method="post" enctype="multipart/form-data">
 
 </form>
