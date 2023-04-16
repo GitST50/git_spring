@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.Mapper;
 import com.co.kr.domain.LoginDomain;
 
 @Mapper
-public interface UserMapper {
+public interface UserMapper { //Mapper.xml에서 쿼리문으로 처리해서 가져옴
 	
 	//전체 리스트 조회
 	public LoginDomain mbSelectList(Map<String, String> map);

@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 public class Pagination {
 	
 	public static Map<String, Object> pagination(int totalcount, HttpServletRequest request){
+		//총 데이터 수(totalCount)와 HttpServletRequest인 request를 매개변수로 받아서 Map<string,object>형태로 페이지정보 반환
+		//
 		Map<String, Object> map = new HashMap<String,Object>();
 		//페이지넘버 초기화
 		String pnum = request.getParameter("page");
@@ -46,6 +48,8 @@ public class Pagination {
 		map.put("startpage", startpage);
 		map.put("endpage", endpage);
 		map.put("offset", offset);
+		//리턴된 map객체에 rowNUM(요청된페이지번호),pageNum(전체 페이지수),startPage(시작페이지),endPage(끝페이지)
+		//,offset(데이터 조회시 시작위치)저장
 		
 		return map;
 	}

@@ -20,7 +20,7 @@ public class RequestException extends RuntimeException {
 	private String reqNo;
 	
 	//생성자
-	public RequestException(Code code) {
+	public RequestException(Code code) { //InternalException.java 랑 동일한 구조
 		this.code = code;
 	}
 	

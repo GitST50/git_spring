@@ -26,9 +26,9 @@ import lombok.extern.slf4j.Slf4j;
 @Controller
 @Slf4j
 @RequestMapping(value = "/")
-public class UserController {
+public class UserController { //로그인을 처리하고 게시판목록을 가져오는 기능을 제공
 	
-	@Autowired
+	@Autowired //자동으로 객체 생성하고 주입:클래스의 인스턴스를 생성하고 해당 필드와 메소드파라미터에 자동주입
 	private UserService userService;
 	
 	@Autowired
@@ -41,13 +41,14 @@ public class UserController {
 		ModelAndView mav = new ModelAndView();
 		//중복체크
 		Map<String, String> map = new HashMap();
-		map.put("mbId", loginDTO.getId());
-		map.put("mbPw", loginDTO.getPw());
+		map.put("mbId", loginDTO.getId()); //LoginVO에서 id를 가져와서 밸루값에 넣고 키값에 mbId를 넣어줌
+		map.put("mbPw", loginDTO.getPw()); //위와 동일 //나중에 map.get("mbId")호출하면 loginDTO.getId()의 값을 리턴하게됨
 		
 		
 		//중복체크
-		int dupleCheck = userService.mbDuplicationCheck(map);
-		LoginDomain loginDomain = userService.mbGetId(map);
+		int dupleCheck = userService.mbDuplicationCheck(map); //userService 인터페이스의 mbDu..Check(map)을 가져와 dupleCheck에 집어넣음
+		LoginDomain loginDomain = userService.mbGetId(map); //UserMapper.xml -> UserMapper.java -> userService.impl -> userService.java
+		                                                    //를 통하여 map에 id값을 담아서 가져온뒤 LoginDomain 인스턴스에 주입
 		
 		if(dupleCheck == 0) {
 			String alertText = "없는 아이디이거나 패스워드가 잘못되었습니다. 가입해주세요";

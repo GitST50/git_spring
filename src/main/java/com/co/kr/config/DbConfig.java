@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-public class DbConfig {
+public class DbConfig { //DataSource와 DataSourceTransactionManager를 생성하고 관리 , 웹애플리케이션에서 DB에 트랜잭션 적용
 
 	@Bean(destroyMethod="close")
 	public DataSource dataSource() {
@@ -30,5 +30,7 @@ public class DbConfig {
     @Bean
     public DataSourceTransactionManager transactionManager() {
         return new DataSourceTransactionManager(dataSource());
+        //dataSource() 사용하여 DataSourceTransactionManager 에 DataSource 등록
     }
+    
 }
