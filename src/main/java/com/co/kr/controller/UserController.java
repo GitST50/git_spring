@@ -37,8 +37,8 @@ public class UserController { //로그인을 처리하고 게시판목록을 가
 	@RequestMapping(value = "board")
 	public ModelAndView login(LoginVO loginDTO, HttpServletRequest request, HttpServletResponse response) throws IOException{
 		//session 처리
-		HttpSession session = request.getSession();
-		ModelAndView mav = new ModelAndView();
+		HttpSession session = request.getSession(); //request.getSession():HttpServletRequest 객체에서 세션을 얻는 메소드
+		ModelAndView mav = new ModelAndView();      //또한 이미 생성된 세션이있으면 그 세션을 리턴하고 없으면 새로운세션 생성후 리턴
 		//중복체크
 		Map<String, String> map = new HashMap();
 		map.put("mbId", loginDTO.getId()); //LoginVO에서 id를 가져와서 밸루값에 넣고 키값에 mbId를 넣어줌
@@ -61,16 +61,17 @@ public class UserController { //로그인을 처리하고 게시판목록을 가
 		String IP = CommonUtils.getClientIP(request);
 		
 		//session 저장
-		session.setAttribute("ip", IP);
+		session.setAttribute("ip", IP); //session객체에 속성을추가,업뎃 
 		session.setAttribute("id", loginDomain.getMbId());
 		session.setAttribute("mbLevel", loginDomain.getMbLevel());
 		
-		List<BoardListDomain> items = uploadSerivce.boardList();
-		System.out.println("items ==> " + items);
-		mav.addObject("items", items);
+		List<BoardListDomain> items = uploadSerivce.boardList(); //uploadService.java 맨위에있는 전체리스트조회하는 메서드를 호출하여 결과값을 List<BoardListDomain>
+		                                                         //형태의 변수인 items에 집어넣음
+		System.out.println("items ==> " + items);                //이 List가 들어간 items를 뷰에서 이용할수있게함
+		mav.addObject("items", items); //ModelAndView가 전달할 데이터를 설정.  즉, ModelAndView에 board/boardList.html이라는 뷰와 실제데이터 items가 들어감
 		
-		mav.setViewName("board/boardList.html");
-		return mav;
+		mav.setViewName("board/boardList.html"); //ModelAndView가 렌더링할 JSP페이지 설정: 이 메소드의 인자로 JSP파일명을 전달
+		return mav;                              //컨트롤러에서 처리된 결과데이터와 뷰를 함께 전달, 뷰 이름 지정
 	};
 	
 	//좌측 메뉴 클릭시 보드화면 이동(로그인된 상태)

@@ -7,7 +7,7 @@ import lombok.Data;
 @Builder(builderMethodName = "builder")
 public class BoardContentDomain {
 	
-	private Integer bdSeq;
+	private Integer bdSeq; //컨텐츠데이터의 키값
 	private String mbId;
 	
 	private String bdTitle;

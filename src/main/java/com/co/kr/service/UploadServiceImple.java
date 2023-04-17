@@ -38,29 +38,31 @@ import lombok.extern.slf4j.Slf4j;
 public class UploadServiceImple implements UploadService {
 	
 	@Autowired
-	private UploadMapper uploadMapper;
+	private UploadMapper uploadMapper; //UploadMapper를 오토와이어로 자동주입
 	
 	@Override
 	public List<BoardListDomain> boardList(){
 		//TODO Auto-generated method stub
-		return uploadMapper.boardList(); //
+		return uploadMapper.boardList(); //uploadMapper 인터페이스의 boardList()호출
 	}
 
 	@Override
 	public int fileProcess(FileListVO fileListVO, MultipartHttpServletRequest request, HttpServletRequest httpReq) {
 		// TODO Auto-generated method stub
+		//클라이언트가 업로드한 게시물과 파일의 처리
+		
 		//session생성
 		HttpSession session = httpReq.getSession();
 		
-		//content domain 생성
+		//content domain 생성 , 클라이언트가 업로드한 게시글정보를 담는곳
 		BoardContentDomain boardContentDomain = BoardContentDomain.builder()
 				.mbId(session.getAttribute("id").toString())
 				.bdTitle(fileListVO.getTitle())
 				.bdContent(fileListVO.getContent())
 				.build();
 		
-		if(fileListVO.getIsEdit() != null) {
-			boardContentDomain.setBdSeq(Integer.parseInt(fileListVO.getSeq()));
+		if(fileListVO.getIsEdit() != null) { //FileListVO의 isEdit을 반환후 isEdit이 null(게시물이없음)이라면 게시물을 새로 생성
+			boardContentDomain.setBdSeq(Integer.parseInt(fileListVO.getSeq()));      //null이 아니라면(이미있다면) 수정(업데이트)
 			System.out.println("수정업데이트");
 			//db 업데이트
 			uploadMapper.bdContentUpdate(boardContentDomain);

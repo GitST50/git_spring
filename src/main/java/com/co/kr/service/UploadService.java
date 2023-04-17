@@ -16,7 +16,7 @@ public interface UploadService {
 	//전체 리스트 조회
 	public List<BoardListDomain> boardList();
 	
-	//인서트
+	//인서트 및 업데이트
 	public int fileProcess(FileListVO fileListVO, MultipartHttpServletRequest request, HttpServletRequest httpReq);
 	
 	//하나 삭제
