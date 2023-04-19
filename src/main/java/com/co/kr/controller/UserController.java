@@ -11,78 +11,339 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.co.kr.domain.BoardListDomain;
 import com.co.kr.domain.LoginDomain;
 import com.co.kr.service.UploadService;
 import com.co.kr.service.UserService;
 import com.co.kr.util.CommonUtils;
+import com.co.kr.util.Pagination;
 import com.co.kr.vo.LoginVO;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Controller
-@Slf4j
+@Slf4j 
 @RequestMapping(value = "/")
-public class UserController { //로그인을 처리하고 게시판목록을 가져오는 기능을 제공
+public class UserController {
 	
-	@Autowired //자동으로 객체 생성하고 주입:클래스의 인스턴스를 생성하고 해당 필드와 메소드파라미터에 자동주입
+	@Autowired
 	private UserService userService;
 	
 	@Autowired
-	private UploadService uploadSerivce;
-	
+	private UploadService uploadService;
+
 	@RequestMapping(value = "board")
-	public ModelAndView login(LoginVO loginDTO, HttpServletRequest request, HttpServletResponse response) throws IOException{
-		//session 처리
-		HttpSession session = request.getSession(); //request.getSession():HttpServletRequest 객체에서 세션을 얻는 메소드
-		ModelAndView mav = new ModelAndView();      //또한 이미 생성된 세션이있으면 그 세션을 리턴하고 없으면 새로운세션 생성후 리턴
-		//중복체크
+	public ModelAndView login(LoginVO loginDTO, HttpServletRequest request, HttpServletResponse response) throws IOException {
+		
+		//session 처리 
+		HttpSession session = request.getSession();
+		ModelAndView mav = new ModelAndView();
+		// 중복체크
 		Map<String, String> map = new HashMap();
-		map.put("mbId", loginDTO.getId()); //LoginVO에서 id를 가져와서 밸루값에 넣고 키값에 mbId를 넣어줌
-		map.put("mbPw", loginDTO.getPw()); //위와 동일 //나중에 map.get("mbId")호출하면 loginDTO.getId()의 값을 리턴하게됨
+		map.put("mbId", loginDTO.getId());
+		map.put("mbPw", loginDTO.getPw());
 		
+		// 중복체크
+		int dupleCheck = userService.mbDuplicationCheck(map);
+		LoginDomain loginDomain = userService.mbGetId(map);
 		
-		//중복체크
-		int dupleCheck = userService.mbDuplicationCheck(map); //userService 인터페이스의 mbDu..Check(map)을 가져와 dupleCheck에 집어넣음
-		LoginDomain loginDomain = userService.mbGetId(map); //UserMapper.xml -> UserMapper.java -> userService.impl -> userService.java
-		                                                    //를 통하여 map에 id값을 담아서 가져온뒤 LoginDomain 인스턴스에 주입
-		
-		if(dupleCheck == 0) {
+		if(dupleCheck == 0) {  
 			String alertText = "없는 아이디이거나 패스워드가 잘못되었습니다. 가입해주세요";
-			String redirectPath = "main/signin";
+			String redirectPath = "/main/signin";
 			CommonUtils.redirect(alertText, redirectPath, response);
 			return mav;
 		}
-		
-		//현재 아이피 추출
+
+
+		//현재아이피 추출
 		String IP = CommonUtils.getClientIP(request);
 		
 		//session 저장
-		session.setAttribute("ip", IP); //session객체에 속성을추가,업뎃 
+		session.setAttribute("ip",IP);
 		session.setAttribute("id", loginDomain.getMbId());
 		session.setAttribute("mbLevel", loginDomain.getMbLevel());
+				
+		List<BoardListDomain> items = uploadService.boardList();
+		System.out.println("items ==> "+ items);
+		mav.addObject("items", items);
 		
-		List<BoardListDomain> items = uploadSerivce.boardList(); //uploadService.java 맨위에있는 전체리스트조회하는 메서드를 호출하여 결과값을 List<BoardListDomain>
-		                                                         //형태의 변수인 items에 집어넣음
-		System.out.println("items ==> " + items);                //이 List가 들어간 items를 뷰에서 이용할수있게함
-		mav.addObject("items", items); //ModelAndView가 전달할 데이터를 설정.  즉, ModelAndView에 board/boardList.html이라는 뷰와 실제데이터 items가 들어감
+		mav.setViewName("board/boardList.html"); 
 		
-		mav.setViewName("board/boardList.html"); //ModelAndView가 렌더링할 JSP페이지 설정: 이 메소드의 인자로 JSP파일명을 전달
-		return mav;                              //컨트롤러에서 처리된 결과데이터와 뷰를 함께 전달, 뷰 이름 지정
+		return mav;
 	};
-	
-	//좌측 메뉴 클릭시 보드화면 이동(로그인된 상태)
+
+
+  // 좌측 메뉴 클릭시 보드화면 이동 (로그인된 상태)
 	@RequestMapping(value = "bdList")
-	public ModelAndView bdList() {
+	public ModelAndView bdList() { 
 		ModelAndView mav = new ModelAndView();
-		List<BoardListDomain> items = uploadSerivce.boardList();
+		List<BoardListDomain> items = uploadService.boardList();
 		System.out.println("items ==> "+ items);
 		mav.addObject("items", items);
 		mav.setViewName("board/boardList.html");
+		return mav; 
+	};
+	
+	
+	
+	//대시보드 리스트 보여주기
+	@GetMapping("mbList")
+	public ModelAndView mbList(HttpServletRequest request) {
+			
+		ModelAndView mav = new ModelAndView();
+		HttpSession session = request.getSession();
+		
+		//session저장 page 가져오기
+		String page = (String) session.getAttribute("page"); // session에 담고 있는 page 꺼냄
+		//request param 저장 page 가져오기
+		String paramPage = request.getParameter("page");
+		
+		
+		if(paramPage != null) { //param 있으면
+			session.setAttribute("page", paramPage);
+		}else if(page != null) { //session 있으면
+			session.setAttribute("page", page);
+		}else {
+			session.setAttribute("page", "1");
+		}
+		
+		//페이지네이션
+		mav = mbListCall(request);  //리스트만 가져오기
+		
+		mav.setViewName("admin/adminList.html");
+		return mav; 
+	};
+	
+	
+	//페이징으로 리스트 가져오기 
+    public ModelAndView mbListCall(HttpServletRequest request) { //클릭페이지 널이면 
+		ModelAndView mav = new ModelAndView();
+		//페이지네이션 쿼리 참고
+    // SELECT * FROM jsp.member order by mb_update_at limit 1, 5; {offset}{limit}
+
+		//전체 갯수
+		int totalcount = userService.mbGetAll();
+		int contentnum = 10; // 데이터 가져올 갯수 
+		
+		
+		//데이터 유무 분기때 사용
+		boolean itemsNotEmpty;
+		
+		if(totalcount > 0) { // 데이터 있을때
+			
+			// itemsNotEmpty true일때만, 리스트 & 페이징 보여주기
+			itemsNotEmpty = true;
+			//페이지 표현 데이터 가져오기
+			Map<String,Object> pagination = Pagination.pagination(totalcount, request);
+			
+			Map map = new HashMap<String, Integer>();
+	        map.put("offset",pagination.get("offset"));
+	        map.put("contentnum",contentnum);
+			
+	        //페이지별 데이터 가져오기
+			List<LoginDomain> loginDomain = userService.mbAllList(map);
+			
+			//모델객체 넣어주기
+			mav.addObject("itemsNotEmpty", itemsNotEmpty);
+			mav.addObject("items", loginDomain);
+			mav.addObject("rowNUM", pagination.get("rowNUM"));
+			mav.addObject("pageNum", pagination.get("pageNum"));
+			mav.addObject("startpage", pagination.get("startpage"));
+			mav.addObject("endpage", pagination.get("endpage"));
+			
+		}else {
+			itemsNotEmpty = false;
+		}
+		
+		return mav;
+	};
+	
+	
+	//수정페이지 이동
+	@GetMapping("/modify/{mbSeq}")
+    public ModelAndView mbModify(@PathVariable("mbSeq") String mbSeq, RedirectAttributes re) throws IOException {
+		ModelAndView mav = new ModelAndView();
+		re.addAttribute("mbSeq", mbSeq);
+		mav.setViewName("redirect:/mbEditList");
+		return mav;
+	};
+	
+	
+	//대시보드 리스트 보여주기
+	@GetMapping("mbEditList")
+	public ModelAndView mbListEdit(@RequestParam("mbSeq") String mbSeq, HttpServletRequest request) {
+		
+		ModelAndView mav = new ModelAndView();
+		// 해당리스트 가져옴
+		mav = mbListCall(request);  //리스트만 가져오기
+		Map map = new HashMap<String, String>();
+		map.put("mbSeq", mbSeq);
+		LoginDomain loginDomain = userService.mbSelectList(map);
+		System.out.println("loginDomain"+loginDomain.getMbLevel());
+		mav.addObject("item",loginDomain);
+		mav.setViewName("admin/adminEditList.html");
+		return mav; 
+	};
+	
+	
+	//수정업데이트
+	@RequestMapping("/update")
+	public ModelAndView mbModify(LoginVO loginVO, HttpServletRequest request, RedirectAttributes re) throws IOException {
+		
+		ModelAndView mav = new ModelAndView();
+		
+		//page 초기화
+		HttpSession session = request.getSession();
+		
+		String page = "1"; // 업데이트 되면 가장 첫화면으로 갈 것이다.  
+		
+		//db 업데이트
+		LoginDomain loginDomain = null; //초기화
+		String IP = CommonUtils.getClientIP(request);
+		loginDomain = LoginDomain.builder()
+				.mbSeq(Integer.parseInt(loginVO.getSeq()))
+				.mbId(loginVO.getId())
+				.mbPw(loginVO.getPw())
+				.mbLevel(loginVO.getLevel())
+				.mbIp(IP)
+				.mbUse("Y")
+				.build();
+		userService.mbUpdate(loginDomain);
+		
+		//첫 페이지로 이동
+		re.addAttribute("page",page); // 리다이렉트시 파람으로 실어서 보냄
+		mav.setViewName("redirect:/mbList");
+		return mav;
+	};
+	
+	
+	//삭제
+	@GetMapping("/remove/{mbSeq}")
+    public ModelAndView mbRemove(@PathVariable("mbSeq") String mbSeq, RedirectAttributes re, HttpServletRequest request) throws IOException {
+		ModelAndView mav = new ModelAndView();
+		
+		//db 삭제
+		Map map = new HashMap<String, String>();
+		map.put("mbSeq", mbSeq);
+		userService.mbRemove(map);
+		//page 초기화
+		HttpSession session = request.getSession();
+				
+		//보고 있던 현재 페이지로 이동
+		re.addAttribute("page",session.getAttribute("page")); // 리다이렉트시 파람으로 실어서 보냄
+		mav.setViewName("redirect:/mbList");
+		return mav;
+	};
+	
+	
+	// 어드민의 멤버추가 & 회원가입
+	@PostMapping("create")
+	public ModelAndView create(LoginVO loginVO, HttpServletRequest request,HttpServletResponse response) throws IOException {
+		
+		ModelAndView mav = new ModelAndView();
+		
+		//session 처리 
+		HttpSession session = request.getSession();
+		
+		//페이지 초기화
+		String page = (String) session.getAttribute("page");
+		if(page == null)page = "1";
+		
+		// 중복체크
+		Map<String, String> map = new HashMap();
+		map.put("mbId", loginVO.getId());
+		map.put("mbPw", loginVO.getPw());
+		
+		
+		// 중복체크
+		int dupleCheck = userService.mbDuplicationCheck(map);
+		System.out.println(dupleCheck);
+
+		if(dupleCheck > 0) { // 가입되있으면  
+			String alertText = "중복이거나 유효하지 않은 접근입니다";
+			String redirectPath = "/main";
+			System.out.println(loginVO.getAdmin());
+			if(loginVO.getAdmin() != null) {
+				redirectPath = "/main/mbList?page="+page;
+			}
+			CommonUtils.redirect(alertText, redirectPath, response);
+		}else {
+			
+			//현재아이피 추출
+			String IP = CommonUtils.getClientIP(request);
+			
+//			//자동생성 
+//			for (int i = 1; i < 32; i++) {
+//				
+//				LoginDomain loginDomain = null; //초기화
+//				loginDomain = LoginDomain.builder()
+//						.mbId(loginVO.getId()+i)
+//						.mbPw(loginVO.getId())
+//						.mbLevel("2")
+//						.mbIp(IP)
+//						.mbUse("Y")
+//						.build();
+//				
+//				// 저장
+//				userService.mbCreate(loginDomain);
+//			}
+//			mav.setViewName("redirect:/mbList?page=1");
+			
+			
+			//전체 갯수
+			int totalcount = userService.mbGetAll();
+			
+			//db insert 준비
+			LoginDomain loginDomain = LoginDomain.builder()
+					.mbId(loginVO.getId())
+					.mbPw(loginVO.getPw())
+					.mbLevel((totalcount == 0) ? "3" : "2")  // 최초가입자를 level 3 admin 부여
+					.mbIp(IP)
+					.mbUse("Y")
+					.build();
+		
+			// 저장
+			userService.mbCreate(loginDomain);
+			
+			if(loginVO.getAdmin() == null) { // 'admin'들어있을때는 alert 스킵이다
+				// session 저장 
+				session.setAttribute("ip",IP);
+				session.setAttribute("id", loginDomain.getMbId());
+				session.setAttribute("mbLevel", (totalcount == 0) ? "3" : "2");   // 최초가입자를 level 3 admin 부여
+				mav.setViewName("redirect:/bdList");
+			}else { // admin일때
+				mav.setViewName("redirect:/mbList?page=1");
+			}
+		}
+		
+		return mav;
+
+	};
+		
+		
+	// 회원가입 화면
+	@GetMapping("signin")
+    public ModelAndView signIn() throws IOException {
+		ModelAndView mav = new ModelAndView();
+        mav.setViewName("signin/signin.html"); 
+        return mav;
+    }
+	
+	//로그아웃
+	@RequestMapping("logout")
+	public ModelAndView logout(HttpServletRequest request) {
+		ModelAndView mav = new ModelAndView();
+		HttpSession session = request.getSession();
+		session.invalidate(); // 전체삭제
+		mav.setViewName("index.html");
 		return mav;
 	}
-
 }
