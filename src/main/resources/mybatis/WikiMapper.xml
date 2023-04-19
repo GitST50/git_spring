@@ -3,6 +3,51 @@
                         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.co.kr.mapper.WikiMapper">
 
+<!--select all-->
+	<select id="wikiList" resultType="com.co.kr.domain.WikiListDomain">
+	  SELECT wk_seq, wk_id, wk_title, wk_content, wk_create_at, wk_update_at
+	  FROM jsp.wiki order by wk_update_at desc
+	</select>
+	
+<!-- content insert -->
+	<insert id="wikiContentUpload" parameterType="com.co.kr.domain.WikiContentDomain"
+	useGeneratedKeys="true"
+        keyProperty="wkSeq" keyColumn="wk_seq">
+	
+        INSERT INTO jsp.wiki (
+            wk_id,   
+			wk_title,                         
+			wk_content  
+        )
+        VALUES (
+            #{wkId},
+            #{wkTitle},
+            #{wkContent}
+        )
+	</insert>
+	
+<!-- Content update -->
+    <update id="wkContentUpdate" parameterType="com.co.kr.domain.BoardContentDomain">
+        UPDATE jsp.wiki SET
+                wk_seq=#{wkSeq},
+                wk_id=#{wkId},
+                wk_title=#{wkTitle},
+                wk_content=#{wkContent}, 
+                wk_update_at=now()  
+        WHERE wk_seq=#{wkSeq}
+    </update>
+    
+<!-- Content delete -->
+    <delete id="WikiContentRemove" parameterType="hashMap">
+       DELETE FROM jsp.wiki WHERE wk_seq=#{wkSeq}
+    </delete>
+
+
+<!-- content -->
+	<select id="wikiSelectOne" resultType="com.co.kr.domain.BoardListDomain" parameterType="map">
+	    SELECT wk_seq, wk_id, wk_title, wk_content, wk_create_at, wk_update_at
+	    FROM jsp.wiki where wk_seq = #{wkSeq}
+	</select>
 
 
 

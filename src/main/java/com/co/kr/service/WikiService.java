@@ -9,36 +9,24 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.util.HashMap;
 
-import com.co.kr.domain.BoardFileDomain;
-import com.co.kr.domain.BoardListDomain;
+
 import com.co.kr.domain.LoginDomain;
+import com.co.kr.domain.WikiListDomain;
 import com.co.kr.vo.FileListVO;
+import com.co.kr.vo.WikiListVO;
 
 
 public interface WikiService {
 	
-	public Map<String, Object> getWikiList(String wkkeyword);
-	
-
-
-
 
     //전체 리스트 조회
-	public List<BoardListDomain> boardList();
+	public List<WikiListDomain> wikiList();
 	
 	//인서트 및 업데이트
-	public int fileProcess(FileListVO fileListVO, MultipartHttpServletRequest request, HttpServletRequest httpReq);
-	
-	//하나 삭제
-	public void bdContentRemove(HashMap<String, Object> map);
-	
-	//하나 삭제
-	public void bdFileRemove(BoardFileDomain boardFileDomain);
+	public int wikiProcess(WikiListVO wikiListVO, MultipartHttpServletRequest request, HttpServletRequest httpReq);
 	
 	//하나 리스트 조회
-	public BoardListDomain boardSelectOne(HashMap<String, Object> map);
+	public WikiListDomain wikiSelectOne(HashMap<String, Object> map);
 	
-	//하나 파일 리스트 조회
-	public List<BoardFileDomain> boardSelectOneFile(HashMap<String, Object> map);
 
 }
