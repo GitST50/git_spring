@@ -80,7 +80,7 @@ public class FileListController {
 		
 	}
 	
-	//detail
+	//detail//
 	@GetMapping("detail")
 	public ModelAndView bdDetail(@ModelAttribute("fileListVO") FileListVO fileListVO, @RequestParam("bdSeq") String bdSeq, HttpServletRequest request) throws IOException {
 		ModelAndView mav = new ModelAndView();
