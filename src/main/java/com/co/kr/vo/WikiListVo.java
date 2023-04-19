@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class WikiListVo {
+public class WikiListVO {
 	
 	private String wkisEdit;
 	private String wkseq;
