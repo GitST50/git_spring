@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net/nz/thymeleaf/layout"
+    layout:decorate="~{layouts/layout}">
+
+<th:block layout:fragment="css"></th:block>
+<head>
+<meta charset="EUC-KR">
+<title>위키 게시판</title>
+</head>
+<body>
+<form method="get" action="/wiki">
+<label>검색어: </label>
+<input type="text" name="wkkeyword" th:value="${wkkeyword}">
+<input type="submit" value="검색">
+</form>
+</body>
+</html>

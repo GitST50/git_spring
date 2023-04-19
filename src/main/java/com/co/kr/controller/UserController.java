@@ -177,7 +177,7 @@ public class UserController {
 	};
 	
 	
-	//대시보드 리스트 보여주기
+	//대시보드 리스트 보여주기//
 	@GetMapping("mbEditList")
 	public ModelAndView mbListEdit(@RequestParam("mbSeq") String mbSeq, HttpServletRequest request) {
 		
