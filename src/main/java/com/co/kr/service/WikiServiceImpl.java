@@ -22,11 +22,11 @@ import lombok.extern.slf4j.Slf4j;
 public class WikiServiceImpl {
 	
 	@Autowired
-	private WikiMapper wikiMapper;
+	private WikiMapper wikiMapper; //wikiMapper를 오토와이어로 자동주입
 	
 	
 	public List<WikiListDomain> wikiList(){
-		return wikiMapper.wikiList();
+		return wikiMapper.wikiList(); //wikiMapper의 wikiList()호출
 	}
 	
 	

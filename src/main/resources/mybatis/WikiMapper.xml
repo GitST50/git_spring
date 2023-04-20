@@ -10,7 +10,7 @@
 	</select>
 	
 <!-- content insert -->
-	<insert id="wikiContentUpload" parameterType="com.co.kr.domain.WikiContentDomain"
+	<insert id="wkContentUpload" parameterType="com.co.kr.domain.WikiContentDomain"
 	useGeneratedKeys="true"
         keyProperty="wkSeq" keyColumn="wk_seq">
 	
@@ -27,7 +27,7 @@
 	</insert>
 	
 <!-- Content update -->
-    <update id="wkContentUpdate" parameterType="com.co.kr.domain.BoardContentDomain">
+    <update id="wkContentUpdate" parameterType="com.co.kr.domain.WikiContentDomain">
         UPDATE jsp.wiki SET
                 wk_seq=#{wkSeq},
                 wk_id=#{wkId},
@@ -38,13 +38,13 @@
     </update>
     
 <!-- Content delete -->
-    <delete id="WikiContentRemove" parameterType="hashMap">
+    <delete id="WkContentRemove" parameterType="hashMap">
        DELETE FROM jsp.wiki WHERE wk_seq=#{wkSeq}
     </delete>
 
 
 <!-- content -->
-	<select id="wikiSelectOne" resultType="com.co.kr.domain.BoardListDomain" parameterType="map">
+	<select id="wikiSelectOne" resultType="com.co.kr.domain.WikiListDomain" parameterType="map">
 	    SELECT wk_seq, wk_id, wk_title, wk_content, wk_create_at, wk_update_at
 	    FROM jsp.wiki where wk_seq = #{wkSeq}
 	</select>
